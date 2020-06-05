@@ -1,4 +1,4 @@
-# lavadeno &middot; [![Discord](https://discordapp.com/api/guilds/696355996657909790/embed.png)](https://discord.gg/BnQECNd) 
+# lavadeno &middot; [![Discord](https://discordapp.com/api/guilds/696355996657909790/embed.png)](https://discord.gg/BnQECNd)
 
 > lavadeno is a simple, easy-to-use, and flexible lavalink client built on the **[Deno](https://deno.land/)** Runtime.
 
