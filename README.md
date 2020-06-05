@@ -1,4 +1,4 @@
-# lavadeno &middot; [![Discord](https://discordapp.com/api/guilds/696355996657909790/embed.png)](https://discord.gg/BnQECNd) [![Version](https://img.shields.io/npm/v/lavaclient.svg?maxAge=3600)](https://npmjs.com/lavadeno) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/fe049eb85ee74900ae764fc5af6a6299)](https://www.codacy.com/gh/Lavaclient/lavaclient?utm_source=github.com&utm_medium=referral&utm_content=Lavaclient/lavaclient&utm_campaign=Badge_Grade)
+# lavadeno &middot; [![Discord](https://discordapp.com/api/guilds/696355996657909790/embed.png)](https://discord.gg/BnQECNd) 
 
 > lavadeno is a simple, easy-to-use, and flexible lavalink client built on the **[Deno](https://deno.land/)** Runtime.
 
@@ -12,7 +12,7 @@ Lavadeno is untested and might crash... who knows... I don't know, do you?
 
 ```ts
 import { Manager } from "https://deno.land/x/lavadeno/mod.ts";
-
+1
 const manager = new Manager(
   [{ host: "localhost", port: 2333, password: "youshallnotpass" }],
   {
