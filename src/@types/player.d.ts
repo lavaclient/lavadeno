@@ -10,19 +10,6 @@ export interface PlayTrack extends PlayerRequest<"play"> {
   noReplace: boolean;
 }
 
-export type PlayOptions = Partial<Omit<PlayTrack, "op" | "guildId" | "track">>;
-
-export interface PlayerData {
-  guild: string;
-  channel: string;
-  node?: string;
-}
-
-export interface ConnectOptions {
-  deaf?: boolean;
-  mute?: boolean;
-}
-
 export enum Severity {
   COMMON,
   SUSPICIOUS,
