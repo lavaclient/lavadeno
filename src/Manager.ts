@@ -184,15 +184,13 @@ export class Manager extends EventEmitter {
    * @param query The search query.
    */
   public async search(query: string): Promise<LoadTracksResponse> {
-    return new Promise(async (resolve, reject) => {
-      const socket = this.ideal[0];
-      if (!socket)
-        throw new Error("Manager#create(): No available sockets.")
-
-      soxa.get(`http${socket.secure ? "s" : ""}://${socket.address}/loadtracks?identifier=${query}`)
-        .then((r) => resolve(r.data))
-        .catch(e => reject(e));
-    });
+    const socket = this.ideal[0];
+    if (!socket)
+      throw new Error("Manager#create(): No available sockets.")
+                
+    const resp = await fetch(`http${socket.secure ? "s" : ""}://${socket.address}/loadtracks?identifier=${query}`);
+    const data = await resp.json();
+    return data;
   }
 }
 
