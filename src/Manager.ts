@@ -194,7 +194,7 @@ export class Manager extends EventEmitter {
       
     });
     const data = await resp.text();
-    return data;
+    return data as any;
   }
 }
 
