@@ -183,7 +183,7 @@ export class Manager extends EventEmitter {
    * Search lavalink for songs.
    * @param query The search query.
    */
-  public async search(query: string): Promise<any> {
+  public async search(query: string): Promise<LoadTracksResponse> {
     const socket = this.ideal[0];
     if (!socket)
       throw new Error("Manager#create(): No available sockets.")
@@ -191,9 +191,9 @@ export class Manager extends EventEmitter {
     const resp = await fetch(`http${socket.secure ? "s" : ""}://${socket.address}/loadtracks?identifier=${encodeURIComponent(query ?? '')}`, {
       headers: { Authorization: socket.password ?? 'youshallnotpass' },
       method: 'GET',
-      
     });
-    const data = await resp.text();
+    
+    const data = await resp.json();
     return data;
   }
 }
