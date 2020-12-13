@@ -247,7 +247,7 @@ export interface ManagerOptions {
   reconnect?: ReconnectOptions;
 }
 
-export interface ReconnectOptions {
+interface ReconnectOptions {
   /**
    * The total amount of reconnect tries
    */
