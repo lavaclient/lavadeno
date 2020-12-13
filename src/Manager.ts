@@ -183,7 +183,7 @@ export class Manager extends EventEmitter {
    * Search lavalink for songs.
    * @param query The search query.
    */
-  public async search(query: string): Promise<LoadTracksResponse> {
+  public async search(query: string): Promise<any> {
     const socket = this.ideal[0];
     if (!socket)
       throw new Error("Manager#create(): No available sockets.")
@@ -194,7 +194,7 @@ export class Manager extends EventEmitter {
       
     });
     const data = await resp.text();
-    return data as any;
+    return data;
   }
 }
 
