@@ -188,7 +188,9 @@ export class Manager extends EventEmitter {
     if (!socket)
       throw new Error("Manager#create(): No available sockets.")
                 
-    const resp = await fetch(`http${socket.secure ? "s" : ""}://${socket.address}/loadtracks?identifier=${query}`);
+    const resp = await fetch(`http${socket.secure ? "s" : ""}://${socket.address}/loadtracks?identifier=${query}`, {
+      headers: { Authorization: socket.password ?? 'youshallnotpass' }
+    });
     const data = await resp.json();
     return data;
   }
