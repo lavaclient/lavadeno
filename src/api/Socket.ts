@@ -25,7 +25,7 @@ export interface ReconnectOptions {
    * The delay between socket reconnection's.
    */
   delay?: number;
-}import type { ReconnectOptions } from "../../../lavaclient/src";
+}
 
 export enum Status {
   CONNECTED,
