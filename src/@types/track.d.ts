@@ -1,4 +1,4 @@
-import { Severity } from "./misc.d.ts";
+import { Severity } from "./player.d.ts";
 
 export type LoadType = "TRACK_LOADED" | "PLAYLIST_LOADED" | "SEARCH_RESULT" | "NO_MATCHES" | "LOAD_FAILED"
 
