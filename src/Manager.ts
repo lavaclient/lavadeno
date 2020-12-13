@@ -4,7 +4,7 @@ import { soxa } from "https://deno.land/x/soxa/mod.ts"
 import { Socket, SocketData } from "./api/Socket.ts";
 import { Player } from "./api/Player.ts";
 
-import type { LoadTracksResponse } from "./@types/tack.d.ts";
+import type { LoadTracksResponse } from "./@types/track.d.ts";
 
 const defaults = {
   resuming: { key: Math.random().toString(32), timeout: 60000 },
