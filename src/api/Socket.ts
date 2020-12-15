@@ -9,7 +9,23 @@ import {
 import { Buffer } from "https://deno.land/std@0.66.0/node/buffer.ts";
 
 import type { Manager } from "../Manager.ts";
-import type { ReconnectOptions } from "../../../lavaclient/src";
+
+export interface ReconnectOptions {
+  /**
+   * The total amount of reconnect tries
+   */
+  maxTries?: number;
+
+  /**
+   * Whether or not reconnection's are automatically done.
+   */
+  auto?: boolean;
+
+  /**
+   * The delay between socket reconnection's.
+   */
+  delay?: number;
+}
 
 export enum Status {
   CONNECTED,

@@ -12,7 +12,7 @@ import type {
   TrackStartEvent,
   TrackStuckEvent,
   WebSocketClosedEvent
-} from "../@types";
+} from "../@types/index.d.ts";
 
 export class Player extends EventEmitter {
   /**
