@@ -1,6 +1,5 @@
 import { EventEmitter } from "https://deno.land/std@0.66.0/node/events.ts";
 import { WebSocketCloseEvent } from "https://deno.land/std@0.66.0/ws/mod.ts";
-import { soxa } from "https://deno.land/x/soxa/mod.ts"
 import { Socket, SocketData } from "./api/Socket.ts";
 import { Player } from "./api/Player.ts";
 
