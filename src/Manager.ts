@@ -60,7 +60,7 @@ export class Manager extends EventEmitter {
   public constructor(nodes: SocketData[], options: ManagerOptions) {
     super();
 
-    options = Object.assign(options, defaults);
+    options = Object.assign(defaults, options);
 
     this.sockets = new Map();
     this.players = new Map();
