@@ -1,10 +1,9 @@
 import { EventEmitter } from "https://deno.land/std@0.66.0/node/events.ts";
 import { WebSocketCloseEvent } from "https://deno.land/std@0.66.0/ws/mod.ts";
-import { soxa } from "https://deno.land/x/soxa/mod.ts"
 import { Socket, SocketData } from "./api/Socket.ts";
 import { Player } from "./api/Player.ts";
 
-import type { LoadTracksResponse } from "./@types";
+import type { LoadTracksResponse } from "./@types/track.d.ts";
 
 const defaults = {
   resuming: { key: Math.random().toString(32), timeout: 60000 },
@@ -184,15 +183,17 @@ export class Manager extends EventEmitter {
    * @param query The search query.
    */
   public async search(query: string): Promise<LoadTracksResponse> {
-    return new Promise(async (resolve, reject) => {
-      const socket = this.ideal[0];
-      if (!socket)
-        throw new Error("Manager#create(): No available sockets.")
-
-      soxa.get(`http${socket.secure ? "s" : ""}://${socket.address}/loadtracks?identifier=${query}`)
-        .then((r) => resolve(r.data))
-        .catch(e => reject(e));
+    const socket = this.ideal[0];
+    if (!socket)
+      throw new Error("Manager#create(): No available sockets.")
+                
+    const resp = await fetch(`http${socket.secure ? "s" : ""}://${socket.address}/loadtracks?identifier=${encodeURIComponent(query ?? '')}`, {
+      headers: { Authorization: socket.password ?? 'youshallnotpass' },
+      method: 'GET',
     });
+    
+    const data = await resp.json();
+    return data;
   }
 }
 
@@ -247,7 +248,7 @@ export interface ManagerOptions {
   reconnect?: ReconnectOptions;
 }
 
-export interface ReconnectOptions {
+interface ReconnectOptions {
   /**
    * The total amount of reconnect tries
    */
