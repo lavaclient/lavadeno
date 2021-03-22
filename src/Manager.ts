@@ -130,7 +130,7 @@ export class Manager extends EventEmitter {
    * @since 1.0.0
    */
   public async stateUpdate(update: VoiceState): Promise<void> {
-    const player = this.players.get(update.guild_id);
+    const player = this.players.get(update.guild_id ?? "");
     if (player && update.user_id === this.userId) {
       if (update.channel_id !== player.channel) {
         player.emit("move", update.channel_id);
@@ -277,27 +277,41 @@ export interface ResumeOptions {
   key?: string;
 }
 
-/**
- * @internal
- */
+/** @internal https://discord.com/developers/docs/topics/gateway#voice-server-update */
 export interface VoiceServer {
+  /** Voice connection token */
   token: string;
+  /** The guild this voice server update is for */
   guild_id: string;
+  /** The voice server host */
   endpoint: string;
 }
 
-/**
- * @internal
- */
+/** @internal https://discord.com/developers/docs/resources/voice#voice-state-object */
 export interface VoiceState {
-  channel_id?: string;
-  guild_id: string;
+  /** The guild id this voice state is for */
+  guild_id?: string;
+  /** The channel id this user is connected to */
+  channel_id: string | null;
+  /** The user id this voice state is for */
   user_id: string;
+  /** The guild member this voice state is for */
+  // TODO: add GuildMember payload types
+  member?: any;
+  /** The session id for this voice state */
   session_id: string;
-  deaf?: boolean;
-  mute?: boolean;
-  self_deaf?: boolean;
-  self_mute?: boolean;
-  suppress?: boolean;
+  /** Whether this user is deafened by the server */
+  deaf: boolean;
+  /** Whether this user is muted by the server */
+  mute: boolean;
+  /** Whether this user is locally deafened */
+  self_deaf: boolean;
+  /** Whether this user is locally muted */
+  self_mute: boolean;
+  /** Whether this user is streaming using "Go Live" */
+  self_stream?: boolean;
+  /** Whether this user's camera is enabled */
+  self_video: boolean;
+  /** Whether this user is muted by the current user */
+  suppress: boolean;
 }
-
