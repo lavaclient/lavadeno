@@ -14,7 +14,7 @@
 
 - Deno 1.3.x
 - Lavalink
-  - [Official](https://github.com/frederikam/lavalink)
+  - [Official](https://github.com/freyacodes/lavalink)
   - [With Filters (Unofficial)](https://github.com/melike2d/lavalink/)
 - Connection to the Discord Gateway.
 
