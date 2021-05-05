@@ -2,7 +2,7 @@
 <hr />
 <blockquote>
   A powerful lavalink client built on the <strong>Deno</strong> Runtime
-  <p><a href="https://discord.gg/vuJxnYk">Discord Server</a> &bull; <a href="https://github.com/lavaclient/lavadeno">Github</a></p>
+  <p><a href="https://discord.gg/CH9ubGPMV6">Discord Server</a> &bull; <a href="https://github.com/lavaclient/lavadeno">Github</a></p>
 </blockquote>
 
 - **Flexible**: Lavadeno is not restricted to a specific discord library. Meaning you only need a connection to the discord gateway for it to work.
@@ -39,4 +39,4 @@ const manager = new Manager(nodes, {
 
 ---
 
-<p align="center"><a href="https://melike2d.me">melike2d</a> &copy; 2020</p>
+<p align="center"><a href="https://dimensional.fun">melike2d</a> &copy; 2020</p>
