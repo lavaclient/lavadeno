@@ -127,7 +127,6 @@ export class Socket {
     };
   }
 
-  // @ts-ignore
   /**
    *
    */
@@ -171,7 +170,7 @@ export class Socket {
    * @param priority If this message should be prioritized.
    * @since 1.0.0
    */
-  public async send(data: unknown, priority = false): Promise<void> {
+  public send(data: unknown, priority = false): Promise<void> {
     return new Promise((resolve, reject) => {
       data = JSON.stringify(data);
       this.queue[priority ? "unshift" : "push"]({ data: data, reject, resolve });
@@ -233,16 +232,18 @@ export class Socket {
    * Configures lavalink resuming.
    * @since 1.0.0
    */
-  private async configureResuming(): Promise<void> {
-    if (this.reconnection !== null) {
-      this.resumeKey = this.manager.resuming.key ?? Math.random().toString(32);
-
-      return this.send({
-        op: "configureResuming",
-        timeout: this.manager.resuming.timeout ?? 60000,
-        key: this.resumeKey
-      }, true);
+  private configureResuming(): Promise<void> {
+    if (!this.reconnection) {
+      return Promise.resolve()
     }
+
+    this.resumeKey = this.manager.resuming.key ?? Math.random().toString(32);
+
+    return this.send({
+      op: "configureResuming",
+      timeout: this.manager.resuming.timeout ?? 60000,
+      key: this.resumeKey
+    }, true);
   }
 
   /**
@@ -317,13 +318,13 @@ export class Socket {
   /**
    * @private
    */
-  private async _send(payload: Payload): Promise<void> {
+  private _send(payload: Payload): void {
     try {
       this.ws?.send?.(payload.data as string);
-      payload.resolve(true, null)
+      payload.resolve()
     } catch (e) {
       this.manager.emit("socketError", this, e)
-      payload.reject(false, e);
+      payload.reject(e);
     }
   }
 }
@@ -388,7 +389,7 @@ export interface SocketData {
 }
 
 export interface Payload {
-  resolve: (...args: any[]) => unknown;
+  resolve: () => unknown;
   reject: (...args: unknown[]) => unknown;
   data: unknown;
 }

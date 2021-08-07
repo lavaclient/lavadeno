@@ -1,7 +1,6 @@
-import { EventEmitter } from "https://deno.land/std@0.66.0/node/events.ts";
-import { WebSocketCloseEvent } from "https://deno.land/std@0.66.0/ws/mod.ts";
 import { Socket, SocketData } from "./api/Socket.ts";
 import { Player } from "./api/Player.ts";
+import { WebSocketCloseEvent, EventEmitter } from "../deps.ts";
 
 import type { LoadTracksResponse } from "./@types/track.d.ts";
 
@@ -91,9 +90,11 @@ export class Manager extends EventEmitter {
    * @param userId The client user id.
    * @since 1.0.0
    */
-  public init(userId: string = this.userId!): void {
+  public init(id?: bigint): void;
+  public init(id?: string): void;
+  public init(userId: string | bigint = this.userId!): void {
     if (!userId) throw new Error("Provide a client id for lavalink to use.");
-    else this.userId = userId;
+    else this.userId = String(userId);
 
     for (const s of this.nodes) {
       if (!this.sockets.has(s.id)) {
@@ -186,39 +187,39 @@ export class Manager extends EventEmitter {
     const socket = this.ideal[0];
     if (!socket)
       throw new Error("Manager#create(): No available sockets.")
-                
+
     const resp = await fetch(`http${socket.secure ? "s" : ""}://${socket.address}/loadtracks?identifier=${encodeURIComponent(query ?? '')}`, {
       headers: { Authorization: socket.password ?? 'youshallnotpass' },
       method: 'GET',
     });
-    
+
     const data = await resp.json();
     return data;
   }
 }
 
-export type Send = (guildId: string, payload: any) => any;
+export type Send = (guildId: string, payload: Dictionary) => void;
 
 export interface Manager {
   /**
    * Emitted when a lavalink socket is ready.
    */
-  on(event: "socketReady", listener: (socket: Socket) => any): this;
+  on(event: "socketReady", listener: (socket: Socket) => void): this;
 
   /**
    * Emitted when a lavalink socket has ran into an error.
    */
-  on(event: "socketError", listener: (socket: Socket, error: any) => any): this;
+  on(event: "socketError", listener: (socket: Socket, error: Error) => void): this;
 
   /**
    * Emitted when a lavalink socket has been closed.
    */
-  on(event: "socketClose", listener: (socket: Socket, event: WebSocketCloseEvent) => any): this;
+  on(event: "socketClose", listener: (socket: Socket, event: WebSocketCloseEvent) => void): this;
 
   /**
    * Emitted when a lavalink socket has ran out of reconnect tries.
    */
-  on(event: "socketDisconnect", listener: (socket: Socket) => any): this;
+  on(event: "socketDisconnect", listener: (socket: Socket) => void): this;
 }
 
 export interface ManagerOptions {
@@ -297,7 +298,7 @@ export interface VoiceState {
   user_id: string;
   /** The guild member this voice state is for */
   // TODO: add GuildMember payload types
-  member?: any;
+  member?: Dictionary;
   /** The session id for this voice state */
   session_id: string;
   /** Whether this user is deafened by the server */
