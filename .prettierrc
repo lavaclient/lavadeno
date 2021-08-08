@@ -10,6 +10,5 @@
     "singleQuote": false,
     "tabWidth": 4,
     "printWidth": 100,
-    "proseWrap": "preserve",
-    
+    "proseWrap": "preserve"    
 }

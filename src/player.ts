@@ -288,6 +288,7 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
             guildId: `${this.guildId}`,
             ...this.filters,
         });
+        
         return this;
     }
 
