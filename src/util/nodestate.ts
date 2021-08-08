@@ -4,5 +4,5 @@ export enum NodeState {
     Connected,
     Reconnecting,
     Disconnecting,
-    Disconnected
+    Disconnected,
 }

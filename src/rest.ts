@@ -21,7 +21,9 @@ export class REST {
      * Base URL of the node
      */
     get url() {
-        return `http${this.node.connection.info.secure ? "s" : ""}://${this.node.connection.address}`;
+        return `http${this.node.connection.info.secure ? "s" : ""}://${
+            this.node.connection.address
+        }`;
     }
 
     /**
@@ -32,7 +34,7 @@ export class REST {
     }
 
     /**
-     * Loads or searches with the supplied identifier.  
+     * Loads or searches with the supplied identifier.
      * @param identifier Search identifier.
      * @returns The load result.
      */
@@ -59,9 +61,7 @@ export class REST {
      * @returns The decoded track.
      */
     decodeTrack(track: string): Promise<Lavalink.Track> {
-        return this
-            .do(`/decodetrack?track=${track}`)
-            .then(res => res.json());
+        return this.do(`/decodetrack?track=${track}`).then(res => res.json());
     }
 
     /**
@@ -76,15 +76,17 @@ export class REST {
         const init: RequestInit = {
             ...options,
             headers: {
-                Authorization: this.node.connection.info.password
-            }
-        }
+                Authorization: this.node.connection.info.password,
+            },
+        };
 
-        return fetch(`${this.url}${endpoint}`, init)
-            .finally(() => {
-                this.requests++;
-                this.node.debug("rest", `${options.method?.toUpperCase() ?? "GET"} ${endpoint} | total requests=${this.requests}`);
-            });
+        return fetch(`${this.url}${endpoint}`, init).finally(() => {
+            this.requests++;
+            this.node.debug(
+                "rest",
+                `${options.method?.toUpperCase() ?? "GET"} ${endpoint} | total requests=${this.requests}`
+            );
+        });
     }
 }
 

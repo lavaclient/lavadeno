@@ -16,5 +16,4 @@ export class ClusterNode extends Node {
         this.id = id;
         this.cluster = cluster;
     }
-
 }

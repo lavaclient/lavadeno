@@ -66,10 +66,13 @@ export class Node extends EventEmitter<NodeEvents> {
     get penalties() {
         const cpu = Math.pow(1.05, 100 * this.stats.cpu.systemLoad) * 10 - 10;
 
-        let deficit = 0, nulled = 0;
+        let deficit = 0,
+            nulled = 0;
         if (this.stats.frameStats?.deficit !== -1) {
-            deficit = Math.pow(1.03, 500 * ((this.stats.frameStats?.deficit ?? 0) / 3000)) * 600 - 600;
-            nulled = (Math.pow(1.03, 500 * ((this.stats.frameStats?.nulled ?? 0) / 3000)) * 600 - 600) * 2;
+            deficit =
+                Math.pow(1.03, 500 * ((this.stats.frameStats?.deficit ?? 0) / 3000)) * 600 - 600;
+            nulled =
+                (Math.pow(1.03, 500 * ((this.stats.frameStats?.nulled ?? 0) / 3000)) * 600 - 600) * 2;
             nulled *= 2;
         }
 
@@ -89,7 +92,10 @@ export class Node extends EventEmitter<NodeEvents> {
     }
 
     debug(label: string, message: string, player?: Player<this>) {
-        return this.emit("debug", `${player ? `player ${player.guildId} | ` : ""}${label}: ${message}`)
+        return this.emit(
+            "debug",
+            `${player ? `player ${player.guildId} | ` : ""}${label}: ${message}`
+        );
     }
 
     createPlayer(guildId: Snowflake): Player<this> {
@@ -130,7 +136,7 @@ export interface UpdateVoiceStatus {
         channel_id: `${bigint}` | null;
         self_mute: boolean;
         self_deaf: boolean;
-    }
+    };
 }
 
 export interface NodeOptions {
@@ -145,4 +151,4 @@ export type NodeEvents = {
     error: [error: Error];
     debug: [message: string];
     raw: [payload: Lavalink.IncomingMessage];
-}
+};

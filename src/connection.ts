@@ -3,7 +3,15 @@ import { Backoff, BackoffOptions } from "./util/backoff.ts";
 import constants from "./util/constants.ts";
 import { sleep } from "./util/functions.ts";
 
-import { WebSocket, connectWebSocket, WebSocketCloseEvent, Lavalink, isWebSocketCloseEvent, isWebSocketPingEvent, isWebSocketPongEvent } from "../deps.ts";
+import {
+    WebSocket,
+    connectWebSocket,
+    WebSocketCloseEvent,
+    Lavalink,
+    isWebSocketCloseEvent,
+    isWebSocketPingEvent,
+    isWebSocketPongEvent,
+} from "../deps.ts";
 
 import type { Node } from "./node.ts";
 
@@ -12,33 +20,42 @@ export class Connection<N extends Node = Node> {
     readonly info: ConnectionInfo;
 
     resumingOptions?: Required<ResumingOptions>;
-    reconnectOptions?: ReconnectOptions & { tries: number; };
+    reconnectOptions?: ReconnectOptions & { tries: number };
     queue: QueuedPayload[] = [];
     reconnectAttempt = 0;
     latency: number | null = null;
 
-    #_lastPing?: number
+    #_lastPing?: number;
     #_socket?: WebSocket;
-    #_backoff?: Backoff
+    #_backoff?: Backoff;
     #_connectedAt!: number;
 
     constructor(node: N, info: ConnectionInfo) {
         this.node = node;
         this.info = info;
 
-        this.resumingOptions = info.resuming && { timeout: 60000, ...info.resuming };
+        this.resumingOptions = info.resuming && {
+            timeout: 60000,
+            ...info.resuming,
+        };
         this.reconnectOptions = Connection.getReconnectOptions(info.reconnect);
     }
 
-    static getReconnectOptions(options?: ReconnectOptions | ReconnectType): Required<ReconnectOptions> | undefined {
-        const exponential: Required<ExponentialReconnect> = { type: "exponential", tries: 3, initialDelay: 100, maxDelay: 10000, randomizationFactor: 0 }
+    static getReconnectOptions(
+        options?: ReconnectOptions | ReconnectType
+    ): Required<ReconnectOptions> | undefined {
+        const exponential: Required<ExponentialReconnect> = {
+            type: "exponential",
+            tries: 3,
+            initialDelay: 100,
+            maxDelay: 10000,
+            randomizationFactor: 0,
+        };
         if (typeof options === "string") {
-            return options === "basic"
-                ? { type: "basic", delay: 10000, tries: 3 }
-                : exponential
+            return options === "basic" ? { type: "basic", delay: 10000, tries: 3 } : exponential;
         }
 
-        return options && { ...exponential, ...options }
+        return options && { ...exponential, ...options };
     }
 
     get address(): string {
@@ -74,7 +91,11 @@ export class Connection<N extends Node = Node> {
         }
 
         return new Promise((resolve, reject) => {
-            this.queue[prioritize ? "unshift" : "push"]({ payload, resolve, reject });
+            this.queue[prioritize ? "unshift" : "push"]({
+                payload,
+                resolve,
+                reject,
+            });
         });
     }
 
@@ -91,7 +112,10 @@ export class Connection<N extends Node = Node> {
         headers.append("User-Id", `${this.node.userId}`);
         headers.append("Client-Name", constants.clientName);
         headers.append("Authorization", this.info.password);
-        headers.append("User-Agent", `lavadeno (https://github.com/lavaclient/lavadeno, Deno v${Deno.version.deno})`);
+        headers.append(
+            "User-Agent",
+            `lavadeno (https://github.com/lavaclient/lavadeno, Deno v${Deno.version.deno})`
+        );
 
         /* attempt to assign the resume-key header. */
         if (this.resumingOptions) {
@@ -135,9 +159,7 @@ export class Connection<N extends Node = Node> {
         }
 
         for (const { payload, resolve, reject } of this.queue) {
-            await this._send(payload)
-                .then(resolve)
-                .catch(reject);
+            await this._send(payload).then(resolve).catch(reject);
         }
     }
 
@@ -148,8 +170,8 @@ export class Connection<N extends Node = Node> {
 
         const payload: Lavalink.ConfigureResuming = {
             op: "configureResuming",
-            ...this.resumingOptions
-        }
+            ...this.resumingOptions,
+        };
 
         await this.send(payload, true);
     }
@@ -191,11 +213,12 @@ export class Connection<N extends Node = Node> {
             }
 
             if (isWebSocketPongEvent(event)) {
-                this.latency = this.#_lastPing
-                    ? Date.now() - this.#_lastPing
-                    : null;
+                this.latency = this.#_lastPing ? Date.now() - this.#_lastPing : null;
 
-                return this.node.debug("connection", `received pong event${this.latency ? `, latency=${this.latency}ms` : "."}`);
+                return this.node.debug(
+                    "connection",
+                    `received pong event${this.latency ? `, latency=${this.latency}ms` : "."}`
+                );
             }
 
             await this._onmessage(event);
@@ -204,7 +227,10 @@ export class Connection<N extends Node = Node> {
 
     private _onmessage(data: string | Uint8Array) {
         if (typeof data !== "string") {
-            return this.node.debug("connection", "received binary message??? are we even connected to a lavalink instance?");
+            return this.node.debug(
+                "connection",
+                "received binary message??? are we even connected to a lavalink instance?"
+            );
         }
 
         let payload: Lavalink.IncomingMessage;
@@ -241,7 +267,11 @@ export class Connection<N extends Node = Node> {
             return;
         }
 
-        const reconnecting = !!this.reconnectOptions && (this.reconnectOptions.tries === -1 ? true : this.reconnectAttempt < this.reconnectOptions.tries);
+        const reconnecting =
+            !!this.reconnectOptions &&
+            (this.reconnectOptions.tries === -1
+                ? true
+                : this.reconnectAttempt < this.reconnectOptions.tries);
 
         /* emit the disconnected event. */
         this.node.emit("disconnect", event, reconnecting);
@@ -254,7 +284,10 @@ export class Connection<N extends Node = Node> {
         while (true) {
             const delay = this.reconnectDelay!;
             this.reconnectAttempt++;
-            this.node.debug("connection", `attempting to reconnect in ${delay}ms, try=${this.reconnectAttempt}`);
+            this.node.debug(
+                "connection",
+                `attempting to reconnect in ${delay}ms, try=${this.reconnectAttempt}`
+            );
 
             await sleep(delay);
             if (await this.reconnect()) {
@@ -292,7 +325,7 @@ export interface QueuedPayload {
 }
 
 export type ReconnectOptions = ExponentialReconnect | BasicReconnect;
-export type ReconnectType = "basic" | "exponential"
+export type ReconnectType = "basic" | "exponential";
 
 interface BasicReconnect {
     type: "basic";
@@ -301,6 +334,6 @@ interface BasicReconnect {
 }
 
 interface ExponentialReconnect extends BackoffOptions {
-    type: "exponential"
+    type: "exponential";
     tries?: number;
 }

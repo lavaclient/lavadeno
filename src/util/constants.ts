@@ -3,5 +3,5 @@ export type Dictionary<V = any, K extends string | number = string> = Record<K, 
 export default {
     maxEvents: 10,
     clientName: "lavadeno",
-    useFilters: false
-}
+    useFilters: false,
+};

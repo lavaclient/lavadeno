@@ -68,7 +68,6 @@ export class Song implements Lavalink.TrackInfo {
     }
 
     get thumbnail(): string {
-        return `https://img.youtube.com/vi/${this.identifier}/hqdefault.jpg`
+        return `https://img.youtube.com/vi/${this.identifier}/hqdefault.jpg`;
     }
-
 }

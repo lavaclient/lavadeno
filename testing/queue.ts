@@ -44,30 +44,31 @@ export class Queue extends EventEmitter<QueueEvents> {
     constructor(player: Player) {
         super();
 
-        this.player = player.on("trackEnd", (_, reason) => {
-            if (!["REPLACED"].includes(reason)) {
-                this.emit("trackEnd", this.current!);
-                if (this._loop === "song") {
-                    this.tracks.unshift(this.current!);
-                } else {
-                    this.previous.unshift(this.current!);
-                }
-
-                this._next();
-                if (!this.current) {
-                    if (this._loop === "queue") {
-                        this.tracks.push(...this.previous.reverse());
-                        this.previous = [];
-                        return this.start();
+        this.player = player
+            .on("trackEnd", (_, reason) => {
+                if (!["REPLACED"].includes(reason)) {
+                    this.emit("trackEnd", this.current!);
+                    if (this._loop === "song") {
+                        this.tracks.unshift(this.current!);
+                    } else {
+                        this.previous.unshift(this.current!);
                     }
 
-                    this.emit("finished");
-                    return;
-                }
+                    this._next();
+                    if (!this.current) {
+                        if (this._loop === "queue") {
+                            this.tracks.push(...this.previous.reverse());
+                            this.previous = [];
+                            return this.start();
+                        }
 
-                return this.player.play(this.current.track);
-            }
-        })
+                        this.emit("finished");
+                        return;
+                    }
+
+                    return this.player.play(this.current.track);
+                }
+            })
             .on("trackStart", () => this.emit("trackStart", this.current!));
 
         this.tracks = [];
@@ -107,7 +108,7 @@ export class Queue extends EventEmitter<QueueEvents> {
 
         await this.player.play(this.current.track);
 
-        return this.started = true;
+        return (this.started = true);
     }
 
     /**
@@ -121,7 +122,7 @@ export class Queue extends EventEmitter<QueueEvents> {
             ? fromSnowflake(typeof requester === "object" ? requester.id : requester)
             : null;
 
-        for (const song of (Array.isArray(songs) ? songs : [songs])) {
+        for (const song of Array.isArray(songs) ? songs : [songs]) {
             let toAdd: Song | null = null;
             if (song instanceof Song) {
                 toAdd = song;
@@ -191,7 +192,7 @@ export class Queue extends EventEmitter<QueueEvents> {
 export type Addable = Lavalink.Track | Song;
 
 export type QueueEvents = {
-    "trackStart": [song: Song];
-    "trackEnd": [song: Song];
-    "finished": [];
-}
+    trackStart: [song: Song];
+    trackEnd: [song: Song];
+    finished: [];
+};
