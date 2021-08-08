@@ -48,7 +48,7 @@ const cluster = new Cluster({
             port: 2333,
             password: "youshallnotpass",
         },
-    ]
+    ],
     sendGatewayPayload: (id, payload) => sendPayloadToDiscord(),
 });
 
@@ -66,7 +66,7 @@ const node = new Node({
     connection: {
         resuming: {
            key: "lavad3n0ftw" 
-        }
+        },
 
         // exponential backoff
         reconnect: {
@@ -74,14 +74,14 @@ const node = new Node({
             maxDelay: 15000,
             initialDelay: 1000,
             tries: -1 // unlimited
-        }
+        },
 
         // basic 
         reconnect: {
             type: "basic",
             delay: 5000.
             tries: 5
-        }
+        },
     }
 }) 
 ```
