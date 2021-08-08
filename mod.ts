@@ -1,5 +1,12 @@
-export type { Track, TrackInfo, LoadTracksException, LoadTracksResponse, LoadType } from "./src/@types/track.d.ts";
-export type { PlayTrack, PlayerEvent, PlayerEventType, PlayerRequest, PlayerState, PlayerUpdate } from "./src/@types/player.d.ts";
-export * from "./src/api/Socket.ts";
-export * from "./src/api/Player.ts";
-export * from "./src/Manager.ts";
+export * from "./src/cluster.ts";
+export * from "./src/clusternode.ts";
+export * from "./src/connection.ts";
+export * from "./src/player.ts";
+export * from "./src/node.ts";
+export * from "./src/rest.ts";
+export * from "./src/routeplanner.ts";
+
+export * from "./src/util/functions.ts";
+export * from "./src/util/nodestate.ts";
+export * from "./src/util/backoff.ts";
+export { default as constants } from "./src/util/constants.ts";
