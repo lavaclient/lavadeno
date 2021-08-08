@@ -57,13 +57,14 @@ cluster.on("nodeConnect", node => console.log(`node "${node.id}" is now connecte
 cluster.init(870267613635309618n);
 ```
 
-### Resuming/Reconnecting
+### Resuming / Reconnecting
 
-LavaDeno supports exponential backoff and basic reconnection types, along with *manual* reconnecting.
+LavaDeno supports exponential backoff and basic reconnection types, along with *manual* reconnecting as reconnecting isn't automatic.
 
 ```ts
 const node = new Node({
     connection: {
+        // resuming, a key must be supplied or else it wont work.
         resuming: {
            key: "lavad3n0ftw" 
         },
