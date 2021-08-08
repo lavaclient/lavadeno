@@ -1,11 +1,13 @@
 import { EventEmitter, Lavalink, WebSocketCloseEvent } from "../deps.ts";
-import { Node, SendGatewayPayload, Snowflake } from "./node.ts";
+import { ClusterNode } from "./clusternode.ts";
 
 import constants from "./util/constants.ts";
 import { fromSnowflake } from "./util/functions.ts";
 
+import type { SendGatewayPayload, Snowflake } from "./node.ts";
 import type { ConnectionInfo } from "./connection.ts";
 import type { DiscordVoiceServer, DiscordVoiceState, Player } from "./player.ts";
+import type { REST } from "./rest.ts";
 
 export class Cluster extends EventEmitter<ClusterEvents> {
 
@@ -34,6 +36,10 @@ export class Cluster extends EventEmitter<ClusterEvents> {
         }
 
         return nodes;
+    }
+
+    get rest(): REST {
+        return this.idealNodes[0].rest;
     }
 
     get players() {
@@ -74,6 +80,7 @@ export class Cluster extends EventEmitter<ClusterEvents> {
             throw new Error("No available nodes.");
         }
 
+        this.#_players = undefined;
         return node.createPlayer(guildId);
     }
 
@@ -95,8 +102,8 @@ export class Cluster extends EventEmitter<ClusterEvents> {
     }
 
     private forwardEvents(node: ClusterNode) {
-        node.on("connected", (...args) => this.emit("nodeConnect", node, ...args))
-        node.on("disconnected", (...args) => this.emit("nodeDisconnect", node, ...args))
+        node.on("connect", (...args) => this.emit("nodeConnect", node, ...args))
+        node.on("disconnect", (...args) => this.emit("nodeDisconnect", node, ...args))
         node.on("error", (...args) => this.emit("nodeError", node, ...args))
         node.on("raw", (...args) => this.emit("nodeMessage", node, ...args))
         node.on("debug", message => this.emit("nodeDebug", node, message));
@@ -104,24 +111,8 @@ export class Cluster extends EventEmitter<ClusterEvents> {
 
 }
 
-export class ClusterNode extends Node {
-    readonly id: string;
-    readonly cluster: Cluster;
-
-    constructor(id: string, cluster: Cluster, options: ConnectionInfo) {
-        super({
-            connection: options,
-            sendGatewayPayload: (id, p) => cluster.sendGatewayPayload(id, p),
-        });
-
-        this.id = id;
-        this.cluster = cluster;
-    }
-
-}
-
 export type ClusterEvents = {
-    "nodeConnect": [node: ClusterNode, reconnect: boolean];
+    "nodeConnect": [node: ClusterNode, took: number, reconnect: boolean];
     "nodeDisconnect": [node: ClusterNode, event: WebSocketCloseEvent, reconnecting: boolean];
     "nodeError": [node: ClusterNode, error: Error];
     "nodeMessage": [node: ClusterNode, payload: Lavalink.IncomingMessage];

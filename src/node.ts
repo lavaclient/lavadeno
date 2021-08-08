@@ -1,3 +1,5 @@
+// deno-lint-ignore-file camelcase
+
 import { EventEmitter, Lavalink, WebSocketCloseEvent } from "../deps.ts";
 import { Connection, ConnectionInfo } from "./connection.ts";
 import { DiscordVoiceServer, DiscordVoiceState, Player } from "./player.ts";
@@ -8,7 +10,6 @@ import { fromSnowflake } from "./util/functions.ts";
 import { NodeState } from "./util/nodestate.ts";
 
 export class Node extends EventEmitter<NodeEvents> {
-
     static DEFAULTS_STATS: Lavalink.StatsData = {
         cpu: {
             cores: 0,
@@ -39,7 +40,7 @@ export class Node extends EventEmitter<NodeEvents> {
     userId?: bigint;
     stats: Lavalink.StatsData = Node.DEFAULTS_STATS;
 
-    #_connection: Connection;
+    #_connection: Connection<this>;
 
     constructor(options: NodeOptions) {
         super(constants.maxEvents);
@@ -54,7 +55,7 @@ export class Node extends EventEmitter<NodeEvents> {
         this.userId = options.userId && fromSnowflake(options.userId);
     }
 
-    get connection(): Connection {
+    get connection(): Connection<this> {
         return this.#_connection;
     }
 
@@ -80,7 +81,10 @@ export class Node extends EventEmitter<NodeEvents> {
     }
 
     connect(userId: Snowflake | undefined = this.userId) {
-        this.userId ??= userId && fromSnowflake(userId);
+        if (userId) {
+            this.userId ??= fromSnowflake(userId);
+        }
+
         return this.#_connection.connect();
     }
 
@@ -136,8 +140,8 @@ export interface NodeOptions {
 }
 
 export type NodeEvents = {
-    connected: [reconnect: boolean];
-    disconnected: [event: WebSocketCloseEvent, reconnecting: boolean];
+    connect: [took: number, reconnect: boolean];
+    disconnect: [event: WebSocketCloseEvent, reconnecting: boolean];
     error: [error: Error];
     debug: [message: string];
     raw: [payload: Lavalink.IncomingMessage];

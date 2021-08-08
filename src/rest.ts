@@ -1,5 +1,6 @@
 import { Lavalink } from "../deps.ts";
 import { Node } from "./node.ts";
+import { RoutePlanner, routePlanner } from "./routeplanner.ts";
 
 export class REST {
     /**
@@ -21,6 +22,13 @@ export class REST {
      */
     get url() {
         return `http${this.node.connection.info.secure ? "s" : ""}://${this.node.connection.address}`;
+    }
+
+    /**
+     * Route planner management.
+     */
+    get routePlanner(): RoutePlanner {
+        return routePlanner(this);
     }
 
     /**

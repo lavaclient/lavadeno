@@ -1,3 +1,5 @@
+// deno-lint-ignore-file camelcase
+
 import constants from "./util/constants.ts";
 import { fromSnowflake } from "./util/functions.ts";
 
@@ -266,6 +268,11 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
         if ("token" in update) {
             this.#_voiceUpdate.event = update;
         } else {
+            /* check if this voice state is for us and not some random user. */
+            if (fromSnowflake(update.user_id) !== this.node.userId) {
+                return this;
+            }
+
             if (update.channel_id && this.channelId !== fromSnowflake(update.channel_id)) {
                 this.emit("movedChannel", fromSnowflake(update.channel_id))
             }
@@ -283,6 +290,8 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
                 guildId: `${this.guildId}`,
                 ...this.#_voiceUpdate as Lavalink.VoiceUpdateData
             });
+
+            this.connected = true;
         }
 
         return this;
@@ -298,6 +307,7 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
                 this.playing = true;
                 this.playingSince = Date.now();
                 this.track = event.track;
+                this.emit("trackStart", event.track);
                 break;
             case "TrackEndEvent":
                 if (event.reason !== Lavalink.TrackEndReason.Replaced) {
@@ -305,6 +315,7 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
                     this.playingSince = null;
                 }
                 this.track = null;
+                this.emit("trackEnd", event.track, event.reason);
                 break;
             case "TrackStuckEvent":
                 this.emit("trackStuck", event.track, event.thresholdMs);
@@ -341,4 +352,5 @@ export interface DiscordVoiceState {
     session_id: string;
     channel_id: `${bigint}` | null;
     guild_id: `${bigint}`;
+    user_id: `${bigint}`;
 }

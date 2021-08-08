@@ -7,8 +7,8 @@ import { WebSocket, connectWebSocket, WebSocketCloseEvent, Lavalink, isWebSocket
 
 import type { Node } from "./node.ts";
 
-export class Connection {
-    readonly node: Node;
+export class Connection<N extends Node = Node> {
+    readonly node: N;
     readonly info: ConnectionInfo;
 
     resumingOptions?: Required<ResumingOptions>;
@@ -22,7 +22,7 @@ export class Connection {
     #_backoff?: Backoff
     #_connectedAt!: number;
 
-    constructor(node: Node, info: ConnectionInfo) {
+    constructor(node: N, info: ConnectionInfo) {
         this.node = node;
         this.info = info;
 
@@ -83,21 +83,29 @@ export class Connection {
             throw new Error("No user-id provided, cannot connect.");
         }
 
+        /* try to disconnect */
         this.disconnect();
 
+        /* get the headers */
         const headers = new Headers();
-        headers.append("User-Id", String(this.node.userId));
+        headers.append("User-Id", `${this.node.userId}`);
         headers.append("Client-Name", constants.clientName);
         headers.append("Authorization", this.info.password);
+        headers.append("User-Agent", `lavadeno (https://github.com/lavaclient/lavadeno, Deno v${Deno.version.deno})`);
 
-        if (this.node.state !== NodeState.Reconnecting) {
-            this.node.state = NodeState.Connecting;
-            this.node.debug("connecting", "creating websocket...");
-        } else if (this.resumingOptions) {
+        /* attempt to assign the resume-key header. */
+        if (this.resumingOptions) {
             headers.append("Resume-Key", this.resumingOptions.key);
         }
 
+        /* connect to the node. */
+        if (this.node.state !== NodeState.Reconnecting) {
+            this.node.state = NodeState.Connecting;
+            this.node.debug("connection", "creating websocket...");
+        }
+
         try {
+            this.#_connectedAt = Date.now();
             this.#_socket = await connectWebSocket(`ws${this.info.secure ? "s" : ""}://${this.address}`, headers);
         } catch (e) {
             this.node.emit("error", e);
@@ -167,7 +175,9 @@ export class Connection {
         await this.configureResuming();
 
         /* emit the ready event. */
-        this.node.emit("connected", this.node.state === NodeState.Reconnecting);
+        const took = Date.now() - this.#_connectedAt;
+        this.node.emit("connect", took, this.node.state === NodeState.Reconnecting);
+        this.node.debug("connection", `connected in ${took}ms`);
         this.node.state = NodeState.Connected;
 
         /* handle incoming events. */
@@ -188,7 +198,7 @@ export class Connection {
                 return this.node.debug("connection", `received pong event${this.latency ? `, latency=${this.latency}ms` : "."}`);
             }
 
-            return this._onmessage(event);
+            await this._onmessage(event);
         }
     }
 
@@ -214,7 +224,7 @@ export class Connection {
                 if (player) {
                     if (payload.op === "playerUpdate") {
                         player.position = payload.state.position ?? null;
-                        player.connected = payload.state.connected;
+                        player.connected = payload.state.connected ?? player.connected;
                     } else {
                         player.handleEvent(payload);
                     }
@@ -234,7 +244,7 @@ export class Connection {
         const reconnecting = !!this.reconnectOptions && (this.reconnectOptions.tries === -1 ? true : this.reconnectAttempt < this.reconnectOptions.tries);
 
         /* emit the disconnected event. */
-        this.node.emit("disconnected", event, reconnecting);
+        this.node.emit("disconnect", event, reconnecting);
         if (!reconnecting) {
             this.node.state = NodeState.Disconnected;
             return;
@@ -259,7 +269,6 @@ export class Connection {
 
         return this.#_socket?.send(json) ?? Promise.resolve();
     }
-
 }
 
 export interface ConnectionInfo {
