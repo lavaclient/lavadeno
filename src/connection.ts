@@ -112,6 +112,7 @@ export class Connection<N extends Node = Node> {
         headers.append("User-Id", `${this.node.userId}`);
         headers.append("Client-Name", constants.clientName);
         headers.append("Authorization", this.info.password);
+        headers.append("Num-Shards", "1");
         headers.append(
             "User-Agent",
             `lavadeno (https://github.com/lavaclient/lavadeno, Deno v${Deno.version.deno})`
