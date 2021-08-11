@@ -356,6 +356,9 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
             case "TrackExceptionEvent":
                 this.emit("trackException", event.track, new Error(event.error));
                 break;
+            case "WebSocketClosedEvent":
+                this.emit("channelLeave", event.code, event.reason, event.byRemote)
+                break;
         }
     }
 }
@@ -368,6 +371,7 @@ export type PlayerEvents = {
     trackException: [track: string | null, error: Error];
     trackStuck: [track: string | null, thresholdMs: number];
     movedChannel: [channelId: bigint];
+    channelLeave: [code: number, reason: string, byRemote: boolean];
 };
 
 export interface ConnectOptions {
