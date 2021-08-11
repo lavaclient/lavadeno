@@ -307,7 +307,7 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
             }
 
             if (update.channel_id && this.channelId !== fromSnowflake(update.channel_id)) {
-                this.emit("movedChannel", fromSnowflake(update.channel_id));
+                this.emit("channelMove", this.channelId!, fromSnowflake(update.channel_id));
             }
 
             this.#_voiceUpdate.sessionId = update.session_id;
@@ -370,8 +370,8 @@ export type PlayerEvents = {
     trackEnd: [track: string | null, reason: Lavalink.TrackEndReason];
     trackException: [track: string | null, error: Error];
     trackStuck: [track: string | null, thresholdMs: number];
-    movedChannel: [channelId: bigint];
     channelLeave: [code: number, reason: string, byRemote: boolean];
+    channelMove: [from: bigint, to: bigint];
 };
 
 export interface ConnectOptions {
