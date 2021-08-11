@@ -363,10 +363,10 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
 export type PlayOptions = Omit<Lavalink.PlayData, "track">;
 
 export type PlayerEvents = {
-    trackStart: [track: string];
-    trackEnd: [track: string, reason: Lavalink.TrackEndReason];
+    trackStart: [track: string | null];
+    trackEnd: [track: string | null, reason: Lavalink.TrackEndReason];
     trackException: [track: string | null, error: Error];
-    trackStuck: [track: string, thresholdMs: number];
+    trackStuck: [track: string | null, thresholdMs: number];
     movedChannel: [channelId: bigint];
 };
 
