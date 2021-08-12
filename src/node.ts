@@ -4,9 +4,8 @@ import { EventEmitter, Lavalink } from "../deps.ts";
 import { Connection, ConnectionInfo } from "./connection.ts";
 import { DiscordVoiceServer, DiscordVoiceState, Player } from "./player.ts";
 import { REST } from "./rest.ts";
-
 import constants from "./util/constants.ts";
-import { fromSnowflake } from "./util/functions.ts";
+import { snowflakeToBigint } from "./util/functions.ts";
 import { NodeState } from "./util/nodestate.ts";
 
 export class Node extends EventEmitter<NodeEvents> {
@@ -52,7 +51,7 @@ export class Node extends EventEmitter<NodeEvents> {
 
         this.sendGatewayPayload = options.sendGatewayPayload;
         this.state = NodeState.Idle;
-        this.userId = options.userId && fromSnowflake(options.userId);
+        this.userId = options.userId && snowflakeToBigint(options.userId);
     }
 
     get connection(): Connection<this> {
@@ -85,7 +84,7 @@ export class Node extends EventEmitter<NodeEvents> {
 
     connect(userId: Snowflake | undefined = this.userId) {
         if (userId) {
-            this.userId ??= fromSnowflake(userId);
+            this.userId ??= snowflakeToBigint(userId);
         }
 
         return this.#_connection.connect();
@@ -99,7 +98,7 @@ export class Node extends EventEmitter<NodeEvents> {
     }
 
     createPlayer(guildId: Snowflake): Player<this> {
-        const guild = fromSnowflake(guildId);
+        const guild = snowflakeToBigint(guildId);
 
         let player = this.players.get(guild);
         if (!player) {
@@ -111,7 +110,7 @@ export class Node extends EventEmitter<NodeEvents> {
     }
 
     destroyPlayer(guildId: Snowflake): boolean {
-        const player = this.players.get(fromSnowflake(guildId));
+        const player = this.players.get(snowflakeToBigint(guildId));
         if (player) {
             player.destroy();
             this.players.delete(player.guildId);
@@ -121,7 +120,7 @@ export class Node extends EventEmitter<NodeEvents> {
     }
 
     handleVoiceUpdate(update: DiscordVoiceServer | DiscordVoiceState) {
-        const player = this.players.get(fromSnowflake(update.guild_id));
+        const player = this.players.get(snowflakeToBigint(update.guild_id));
         player?.handleVoiceUpdate(update);
     }
 }

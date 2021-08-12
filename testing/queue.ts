@@ -1,5 +1,5 @@
 import { EventEmitter, Lavalink } from "../deps.ts";
-import { fromSnowflake, Player, Snowflake } from "../mod.ts";
+import { snowflakeToBigint, Player, Snowflake } from "../mod.ts";
 import { Song } from "./song.ts";
 
 export class Queue extends EventEmitter<QueueEvents> {
@@ -119,7 +119,7 @@ export class Queue extends EventEmitter<QueueEvents> {
      */
     add(songs: Addable | Array<Addable>, requester?: Snowflake | { id: Snowflake }): number {
         const requesterId = requester
-            ? fromSnowflake(typeof requester === "object" ? requester.id : requester)
+            ? snowflakeToBigint(typeof requester === "object" ? requester.id : requester)
             : null;
 
         for (const song of Array.isArray(songs) ? songs : [songs]) {

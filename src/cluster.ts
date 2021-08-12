@@ -2,7 +2,7 @@ import { EventEmitter, Lavalink } from "../deps.ts";
 import { ClusterNode } from "./clusternode.ts";
 
 import constants from "./util/constants.ts";
-import { fromSnowflake } from "./util/functions.ts";
+import { snowflakeToBigint } from "./util/functions.ts";
 
 import type { SendGatewayPayload, Snowflake } from "./node.ts";
 import type { ConnectionInfo } from "./connection.ts";
@@ -22,7 +22,7 @@ export class Cluster extends EventEmitter<ClusterEvents> {
 
         this.nodes = Cluster.createNodes(this, options);
 
-        this.userId = options.userId && fromSnowflake(options.userId);
+        this.userId = options.userId && snowflakeToBigint(options.userId);
         this.sendGatewayPayload = options.sendGatewayPayload;
     }
 
@@ -83,7 +83,7 @@ export class Cluster extends EventEmitter<ClusterEvents> {
 
     destroyPlayer(guildId: Snowflake): boolean {
         const removed =
-            this.players.get(fromSnowflake(guildId))?.node?.destroyPlayer(guildId) ?? false;
+            this.players.get(snowflakeToBigint(guildId))?.node?.destroyPlayer(guildId) ?? false;
 
         if (removed) {
             this.#_players = undefined;
@@ -93,7 +93,7 @@ export class Cluster extends EventEmitter<ClusterEvents> {
     }
 
     handleVoiceUpdate(update: DiscordVoiceServer | DiscordVoiceState) {
-        const player = this.players.get(fromSnowflake(update.guild_id));
+        const player = this.players.get(snowflakeToBigint(update.guild_id));
         player?.handleVoiceUpdate(update);
     }
 

@@ -1,7 +1,7 @@
 // deno-lint-ignore-file camelcase
 
 import constants from "./util/constants.ts";
-import { fromSnowflake } from "./util/functions.ts";
+import { snowflakeToBigint } from "./util/functions.ts";
 import { EventEmitter, Lavalink } from "../deps.ts";
 
 import type { Node, Snowflake } from "./node.ts";
@@ -78,7 +78,7 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
     connect(channel: Snowflake | { id: Snowflake } | null, options: ConnectOptions = {}): this {
         /* parse the snowflake. */
         channel = (typeof channel === "object" ? channel?.id : channel) ?? null;
-        this.channelId = channel && fromSnowflake(channel);
+        this.channelId = channel && snowflakeToBigint(channel);
 
         /* send the voice status update payload. */
         this.node.debug(
@@ -312,12 +312,12 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
             this.#_voiceUpdate.event = update;
         } else {
             /* check if this voice state is for us and not some random user. */
-            if (fromSnowflake(update.user_id) !== this.node.userId) {
+            if (snowflakeToBigint(update.user_id) !== this.node.userId) {
                 return this;
             }
 
-            if (update.channel_id && this.channelId !== fromSnowflake(update.channel_id)) {
-                this.emit("channelMove", this.channelId!, fromSnowflake(update.channel_id));
+            if (update.channel_id && this.channelId !== snowflakeToBigint(update.channel_id)) {
+                this.emit("channelMove", this.channelId!, snowflakeToBigint(update.channel_id));
             }
 
             this.#_voiceUpdate.sessionId = update.session_id;
