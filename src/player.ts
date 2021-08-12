@@ -51,12 +51,22 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
     filters: Partial<Lavalink.FilterData> = {};
 
     #_voiceUpdate: Partial<Lavalink.VoiceUpdateData> = {};
+    #_volume = 100;
 
     constructor(node: N, guildId: bigint) {
         super(constants.maxEvents);
 
         this.node = node;
         this.guildId = guildId;
+    }
+
+    /**
+     * The volume of this player.
+     */
+    get volume() {
+        return constants.useFilters
+            ? (this.filters.volume ?? 1) * 100
+            : this.#_volume;
     }
 
     /**
@@ -160,6 +170,7 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
             guildId: `${this.guildId}`,
             position: to,
         });
+
         return this;
     }
 
@@ -178,13 +189,12 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
      * @returns the player, useful for chaining?
      */
     async setVolume(volume = 100): Promise<this> {
-        (await constants.useFilters)
-            ? this.setFilters(Lavalink.Filter.Volume, volume > 1 ? volume / 100 : volume)
-            : this.node.send({
-                  op: "volume",
-                  guildId: `${this.guildId}`,
-                  volume,
-              });
+        if (constants.useFilters) {
+            await this.setFilters(Lavalink.Filter.Volume, volume > 1 ? volume / 100 : volume)
+        } else {
+            await this.node.send({ op: "volume", guildId: this.guildId.toString(), volume });
+            this.#_volume = volume;
+        }
 
         return this;
     }
