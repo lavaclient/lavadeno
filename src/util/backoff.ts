@@ -1,30 +1,21 @@
-export class Backoff {
-    static FACTOR = 2;
+const FACTOR = 2;
 
-    readonly initialDelay: number;
-    readonly maxDelay: number;
-    readonly randomizationFactor: number;
+export function backoff(options: BackoffOptions): Backoff {
+    const initialDelay = options.initialDelay ?? 100
+        , randomizationFactor = options.randomizationFactor ?? 0
+        , maxDelay = options.maxDelay ?? 10000;
 
-    delay = 0;
-    nextDelay = 0;
-
-    constructor(options: BackoffOptions = {}) {
-        this.initialDelay = this.nextDelay = options.initialDelay ?? 100;
-        this.maxDelay = options.maxDelay ?? 10000;
-        this.randomizationFactor = options.randomizationFactor ?? 0;
+    let delay = 0, nextDelay = initialDelay;
+    function next() {
+        delay = Math.min(nextDelay, maxDelay);
+        nextDelay = delay * FACTOR;
+        return delay;
     }
 
-    get next(): number {
-        return Math.round(this._next * (1 + Math.random() * this.randomizationFactor));
-    }
-
-    get _next(): number {
-        this.delay = Math.min(this.nextDelay, this.maxDelay);
-        this.nextDelay = this.delay * Backoff.FACTOR;
-        return this.delay;
-    }
+    return () => Math.round(next() * (1 + Math.random() * randomizationFactor));
 }
 
+export type Backoff = () => number;
 export interface BackoffOptions {
     maxDelay?: number;
     initialDelay?: number;
