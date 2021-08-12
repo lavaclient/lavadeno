@@ -1,7 +1,7 @@
 import { Node } from "./node.ts";
 
 import type { Cluster } from "./cluster.ts";
-import type { ConnectionInfo } from "./connection/connection.ts";
+import type { ConnectionInfo } from "./connection.ts";
 
 export class ClusterNode extends Node {
     readonly id: string;

@@ -1,8 +1,7 @@
 // deno-lint-ignore-file camelcase
 
-import { WebSocketCloseEvent } from "https://deno.land/std@0.104.0/ws/mod.ts";
 import { EventEmitter, Lavalink } from "../deps.ts";
-import { Connection, ConnectionInfo } from "./connection/connection.ts";
+import { Connection, ConnectionInfo } from "./connection.ts";
 import { DiscordVoiceServer, DiscordVoiceState, Player } from "./player.ts";
 import { REST } from "./rest.ts";
 
@@ -148,7 +147,7 @@ export interface NodeOptions {
 
 export type NodeEvents = {
     connect: [took: number, reconnect: boolean];
-    disconnect: [event: WebSocketCloseEvent, reconnecting: boolean];
+    disconnect: [code: number, reason: string | undefined, reconnecting: boolean];
     error: [error: Error];
     debug: [message: string];
     raw: [payload: Lavalink.IncomingMessage];

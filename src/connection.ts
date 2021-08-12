@@ -1,13 +1,11 @@
-import { NodeState } from "../util/nodestate.ts";
-import { Backoff, BackoffOptions } from "../util/backoff.ts";
-import constants from "../util/constants.ts";
-import { sleep } from "../util/functions.ts";
+import { NodeState } from "./util/nodestate.ts";
+import { backoff, Backoff, BackoffOptions } from "./util/backoff.ts";
+import constants from "./util/constants.ts";
+import { delay } from "./util/functions.ts";
 
-import { Lavalink } from "../../deps.ts";
-import { connectWebSocket } from "./socket.ts"
-import { WebSocket, WebSocketCloseEvent, isWebSocketCloseEvent, isWebSocketPingEvent, isWebSocketPongEvent } from "https://deno.land/std@0.104.0/ws/mod.ts"
+import { Lavalink, pogsockets, WebsocketOpCode } from "../deps.ts";
 
-import type { Node } from "../node.ts";
+import type { Node } from "./node.ts";
 
 export class Connection<N extends Node = Node> {
     readonly node: N;
@@ -20,7 +18,7 @@ export class Connection<N extends Node = Node> {
     latency: number | null = null;
 
     #_lastPing?: number;
-    #_socket?: WebSocket;
+    #_socket?: pogsockets.PogSocket;
     #_backoff?: Backoff;
     #_connectedAt!: number;
 
@@ -67,12 +65,12 @@ export class Connection<N extends Node = Node> {
 
         return this.reconnectOptions.type === "basic"
             ? this.reconnectOptions.delay
-            : (this.#_backoff ??= new Backoff(this.reconnectOptions)).next;
+            : (this.#_backoff ??= backoff(this.reconnectOptions))();
     }
 
     async ping(): Promise<boolean> {
         if (this.active) {
-            await this.#_socket!.ping();
+            await pogsockets.sendFrame(this.#_socket!, WebsocketOpCode.Ping, "");
             this.#_lastPing = Date.now();
         }
 
@@ -125,13 +123,13 @@ export class Connection<N extends Node = Node> {
 
         try {
             this.#_connectedAt = Date.now();
-            this.#_socket = await connectWebSocket(`ws${this.info.secure ? "s" : ""}://${this.address}`, headers);
+            this.#_socket = await pogsockets.connectPogSocket(`ws${this.info.secure ? "s" : ""}://${this.address}`, { headers });
         } catch (e) {
             this.node.emit("error", e);
             if (this.node.state === NodeState.Reconnecting) {
                 throw e;
             } else {
-                return this._onclose({ code: -1, reason: e.message });
+                return this._onclose({ code: -1, reason: e.message, type: "close" });
             }
         }
 
@@ -145,7 +143,7 @@ export class Connection<N extends Node = Node> {
 
         this.node.state = NodeState.Disconnecting;
         this.node.debug("connection", `disconnecting... code=${code}, reason=${reason}`);
-        this.#_socket?.close();
+        pogsockets.closeSocket(this.#_socket!);
     }
 
     async flushQueue() {
@@ -198,16 +196,16 @@ export class Connection<N extends Node = Node> {
         this.node.state = NodeState.Connected;
 
         /* handle incoming events. */
-        for await (const event of this.#_socket!) {
-            if (isWebSocketCloseEvent(event)) {
+        for await (const event of pogsockets.readSocket(this.#_socket!)) {
+            if (event.type === "close") {
                 return this._onclose(event);
             }
 
-            if (isWebSocketPingEvent(event)) {
+            if (event.type === "ping") {
                 return this.node.debug("connection", "received ping event.");
             }
 
-            if (isWebSocketPongEvent(event)) {
+            if (event.type === "pong") {
                 this.latency = this.#_lastPing ? Date.now() - this.#_lastPing : null;
 
                 return this.node.debug(
@@ -220,7 +218,7 @@ export class Connection<N extends Node = Node> {
         }
     }
 
-    private _onmessage(data: string | Uint8Array) {
+    private _onmessage({ data }: pogsockets.MessageEvent) {
         if (typeof data !== "string") {
             return this.node.debug(
                 "connection",
@@ -257,7 +255,7 @@ export class Connection<N extends Node = Node> {
         this.node.emit("raw", payload);
     }
 
-    private async _onclose(event: WebSocketCloseEvent) {
+    private async _onclose(event: pogsockets.CloseEvent) {
         if (this.node.state === NodeState.Reconnecting) {
             return;
         }
@@ -269,7 +267,7 @@ export class Connection<N extends Node = Node> {
                 : this.reconnectAttempt < this.reconnectOptions.tries);
 
         /* emit the disconnected event. */
-        this.node.emit("disconnect", event, reconnecting);
+        this.node.emit("disconnect", event.code, event.reason, reconnecting);
         if (!reconnecting) {
             this.node.state = NodeState.Disconnected;
             return;
@@ -277,14 +275,14 @@ export class Connection<N extends Node = Node> {
 
         /* attempt to reconnect. */
         while (true) {
-            const delay = this.reconnectDelay!;
+            const duration = this.reconnectDelay!;
             this.reconnectAttempt++;
             this.node.debug(
                 "connection",
-                `attempting to reconnect in ${delay}ms, try=${this.reconnectAttempt}`
+                `attempting to reconnect in ${duration}ms, try=${this.reconnectAttempt}`
             );
 
-            await sleep(delay);
+            await delay(duration);
             if (await this.reconnect()) {
                 break;
             }
@@ -295,7 +293,7 @@ export class Connection<N extends Node = Node> {
         const json = JSON.stringify(payload);
         this.node.debug("connection", `${constants.clientName} >>> ${payload.op} | ${json}`);
 
-        return this.#_socket?.send(json) ?? Promise.resolve();
+        return pogsockets.sendMessage(this.#_socket!, json) ?? Promise.resolve();
     }
 }
 

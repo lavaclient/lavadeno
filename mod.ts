@@ -4,9 +4,7 @@ export * from "./src/player.ts";
 export * from "./src/node.ts";
 export * from "./src/rest.ts";
 export * from "./src/routeplanner.ts";
-
-export * from "./src/connection/connection.ts";
-export * from "./src/connection/socket.ts";
+export * from "./src/connection.ts";
 
 export * from "./src/util/functions.ts";
 export * from "./src/util/nodestate.ts";

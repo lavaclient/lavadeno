@@ -15,7 +15,7 @@ import { Queue } from "./queue.ts";
 import testsConfig from "./tests.config.ts";
 
 constants.clientName = "lavadeno-testing";
-constants.useFilters = true;
+constants.useFilters = false;
 
 const cluster = new Cluster({
     nodes: [testsConfig.node],
@@ -28,10 +28,9 @@ const cluster = new Cluster({
 
 const queues: Map<bigint, Queue> = new Map();
 
-cluster.on("nodeDisconnect", (node, { code, reason }) => {
+cluster.on("nodeDisconnect", (node, code, reason) => {
     console.log(
-        `[bot] (node ${node.id}) disconnected, code=${code}, reason=${
-            reason ? `"${reason}"` : "unknown"
+        `[bot] (node ${node.id}) disconnected, code=${code}, reason=${reason ? `"${reason}"` : "unknown"
         }`
     );
 });
@@ -73,6 +72,18 @@ startBot({
             const [command, ...args] = message.content.slice(1).trim().split(/\s+/g);
 
             switch (command.toLowerCase()) {
+                case "volume": {
+                    const player = cluster.players.get(message.guildId);
+                    if (!player?.connected) {
+                        return message.reply(
+                            embed("A player for this guild doesn't exist."),
+                            false
+                        );
+                    }
+
+                    player.setVolume(+args[0]);
+                    break;
+                }
                 case "join": {
                     let player = cluster.players.get(message.guildId);
                     if (player?.connected) {
@@ -118,8 +129,8 @@ startBot({
                                 url: current.uri,
                                 footer: requester
                                     ? {
-                                          text: `It was requested by ${requester.username}#${requester.discriminator}`,
-                                      }
+                                        text: `It was requested by ${requester.username}#${requester.discriminator}`,
+                                    }
                                     : undefined,
                                 thumbnail: { url: current.thumbnail },
                             }
@@ -136,17 +147,15 @@ startBot({
                         );
                     }
 
-                    player.filters.timescale =
-                        player.filters.timescale?.rate !== 1
-                            ? { rate: 1.09, pitch: 1.125, speed: 1 }
-                            : { rate: 1, pitch: 1, speed: 1 };
+                    player.filters.timescale = player.filters.timescale?.rate !== 1.0
+                        ? { rate: 1.09, pitch: 1.125, speed: 1 }
+                        : { rate: 1, pitch: 1, speed: 1 };
 
                     player.setFilters();
 
                     return message.reply(
                         embed(
-                            `${
-                                player.filters.timescale?.pitch === 1 ? "Disabled" : "Enabled"
+                            `${player.filters.timescale?.pitch === 1 ? "Enabled" : "Disabled"
                             } **nightcore**!`
                         ),
                         false

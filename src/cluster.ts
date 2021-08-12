@@ -5,10 +5,9 @@ import constants from "./util/constants.ts";
 import { fromSnowflake } from "./util/functions.ts";
 
 import type { SendGatewayPayload, Snowflake } from "./node.ts";
-import type { ConnectionInfo } from "./connection/connection.ts";
+import type { ConnectionInfo } from "./connection.ts";
 import type { DiscordVoiceServer, DiscordVoiceState, Player } from "./player.ts";
 import type { REST } from "./rest.ts";
-import { WebSocketCloseEvent } from "https://deno.land/std@0.104.0/ws/mod.ts";
 
 export class Cluster extends EventEmitter<ClusterEvents> {
     readonly nodes: Map<string, ClusterNode>;
@@ -109,7 +108,7 @@ export class Cluster extends EventEmitter<ClusterEvents> {
 
 export type ClusterEvents = {
     nodeConnect: [node: ClusterNode, took: number, reconnect: boolean];
-    nodeDisconnect: [node: ClusterNode, event: WebSocketCloseEvent, reconnecting: boolean];
+    nodeDisconnect: [node: ClusterNode, code: number, reason: string | undefined, reconnecting: boolean];
     nodeError: [node: ClusterNode, error: Error];
     nodeMessage: [node: ClusterNode, payload: Lavalink.IncomingMessage];
     nodeDebug: [node: ClusterNode, message: string];
