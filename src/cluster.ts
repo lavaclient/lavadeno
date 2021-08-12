@@ -1,13 +1,14 @@
-import { EventEmitter, Lavalink, WebSocketCloseEvent } from "../deps.ts";
+import { EventEmitter, Lavalink } from "../deps.ts";
 import { ClusterNode } from "./clusternode.ts";
 
 import constants from "./util/constants.ts";
 import { fromSnowflake } from "./util/functions.ts";
 
 import type { SendGatewayPayload, Snowflake } from "./node.ts";
-import type { ConnectionInfo } from "./connection.ts";
+import type { ConnectionInfo } from "./connection/connection.ts";
 import type { DiscordVoiceServer, DiscordVoiceState, Player } from "./player.ts";
 import type { REST } from "./rest.ts";
+import { WebSocketCloseEvent } from "https://deno.land/std@0.104.0/ws/mod.ts";
 
 export class Cluster extends EventEmitter<ClusterEvents> {
     readonly nodes: Map<string, ClusterNode>;

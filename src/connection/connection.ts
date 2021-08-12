@@ -1,19 +1,13 @@
-import { NodeState } from "./util/nodestate.ts";
-import { Backoff, BackoffOptions } from "./util/backoff.ts";
-import constants from "./util/constants.ts";
-import { sleep } from "./util/functions.ts";
+import { NodeState } from "../util/nodestate.ts";
+import { Backoff, BackoffOptions } from "../util/backoff.ts";
+import constants from "../util/constants.ts";
+import { sleep } from "../util/functions.ts";
 
-import {
-    WebSocket,
-    connectWebSocket,
-    WebSocketCloseEvent,
-    Lavalink,
-    isWebSocketCloseEvent,
-    isWebSocketPingEvent,
-    isWebSocketPongEvent,
-} from "../deps.ts";
+import { Lavalink } from "../../deps.ts";
+import { connectWebSocket } from "./socket.ts"
+import { WebSocket, WebSocketCloseEvent, isWebSocketCloseEvent, isWebSocketPingEvent, isWebSocketPongEvent } from "https://deno.land/std@0.104.0/ws/mod.ts"
 
-import type { Node } from "./node.ts";
+import type { Node } from "../node.ts";
 
 export class Connection<N extends Node = Node> {
     readonly node: N;
