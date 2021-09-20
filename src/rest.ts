@@ -49,7 +49,7 @@ export class REST {
      * @param tracks Array of base64 encoded lavaplayer tracks to decode.
      * @returns The decode tracks.
      */
-    decodeTracks(tracks: string[]): Promise<Lavalink.Track[]> {
+    decodeTracks(tracks: string[]): Promise<Lavalink.TrackInfo[]> {
         return this
             .do("/decodetracks", { body: JSON.stringify({ tracks }) })
             .then(res => res.json());
@@ -60,7 +60,7 @@ export class REST {
      * @param track The track to decode.
      * @returns The decoded track.
      */
-    decodeTrack(track: string): Promise<Lavalink.Track> {
+    decodeTrack(track: string): Promise<Lavalink.TrackInfo> {
         return this.do(`/decodetrack?track=${track}`).then(res => res.json());
     }
 
