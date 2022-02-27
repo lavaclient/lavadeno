@@ -44,6 +44,10 @@ export class Queue extends EventEmitter<QueueEvents> {
     constructor(player: Player) {
         super();
 
+        player.on("channelJoin", joined => console.log(`[music] (player ${player!.guildId}) joined ${joined}`))
+        player.on("channelLeave", left => console.log(`[music] (player ${player!.guildId}) left ${left}`))
+        player.on("channelMove", (from, to) => console.log(`[music] (player ${player!.guildId}) moved from ${from} to ${to}`));
+
         this.player = player
             .on("trackEnd", (_, reason) => {
                 if (!["REPLACED"].includes(reason)) {

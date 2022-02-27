@@ -76,14 +76,15 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
      * @returns the player, useful for chaining.
      */
     connect(channel: Snowflake | { id: Snowflake } | null, options: ConnectOptions = {}): this {
+        this.#_voiceUpdate = {}
+
         /* parse the snowflake. */
         channel = (typeof channel === "object" ? channel?.id : channel) ?? null;
-        this.channelId = channel && snowflakeToBigint(channel);
 
         /* send the voice status update payload. */
         this.node.debug(
             "voice",
-            `updating voice status in guild=${this.guildId}, channel=${this.channelId}`,
+            `updating voice status in guild=${this.guildId}, channel=${channel}`,
             this
         );
 
@@ -91,7 +92,7 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
             op: 4,
             d: {
                 guild_id: `${this.guildId}`,
-                channel_id: this.channelId ? `${this.channelId}` : null,
+                channel_id: channel ? `${channel}` : null,
                 self_mute: options.muted ?? false,
                 self_deaf: options.deafen ?? false,
             },
@@ -106,6 +107,7 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
      */
     disconnect(): this {
         this.connect(null);
+        this.channelId = null;
         return this;
     }
 
@@ -309,6 +311,10 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
     async handleVoiceUpdate(update: DiscordVoiceState | DiscordVoiceServer): Promise<this> {
         /* update our local voice state or server data. */
         if ("token" in update) {
+            if (this.#_voiceUpdate.event === update) {
+                return this;
+            }
+
             this.#_voiceUpdate.event = update;
         } else {
             /* check if this voice state is for us and not some random user. */
@@ -316,8 +322,17 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
                 return this;
             }
 
-            if (update.channel_id && this.channelId !== snowflakeToBigint(update.channel_id)) {
-                this.emit("channelMove", this.channelId!, snowflakeToBigint(update.channel_id));
+            const channel = snowflakeToBigint(update.channel_id!);
+            if (!channel && this.channelId) {
+                this.emit("channelLeave", this.channelId);
+                this.channelId = null;
+                this.#_voiceUpdate = {};
+            } else if (channel && !this.channelId) {
+                this.channelId = channel;
+                this.emit("channelJoin", channel);
+            } else if (channel !== this.channelId) {
+                this.emit("channelMove", this.channelId!, channel);
+                this.channelId = channel;
             }
 
             this.#_voiceUpdate.sessionId = update.session_id;
@@ -367,7 +382,7 @@ export class Player<N extends Node = Node> extends EventEmitter<PlayerEvents> {
                 this.emit("trackException", event.track, new Error(event.error));
                 break;
             case "WebSocketClosedEvent":
-                this.emit("channelLeave", event.code, event.reason, event.byRemote)
+                this.emit("disconnected", event.code, event.reason, event.byRemote)
                 break;
         }
     }
@@ -380,7 +395,9 @@ export type PlayerEvents = {
     trackEnd: [track: string | null, reason: Lavalink.TrackEndReason];
     trackException: [track: string | null, error: Error];
     trackStuck: [track: string | null, thresholdMs: number];
-    channelLeave: [code: number, reason: string, byRemote: boolean];
+    disconnected: [code: number, reason: string, byRemote: boolean];
+    channelJoin: [joined: bigint];
+    channelLeave: [left: bigint];
     channelMove: [from: bigint, to: bigint];
 };
 

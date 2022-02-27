@@ -40,7 +40,7 @@ cluster.on("nodeError", (_, error) => {
 });
 
 cluster.on("nodeDebug", (node, message) => {
-    console.debug(`[music] (node ${node.id}) ${message}`);
+    // console.debug(`[music] (node ${node.id}) ${message}`);
 });
 
 cluster.on("nodeConnect", (node, reconnect) => {
@@ -100,7 +100,9 @@ startBot({
 
                     player ??= cluster.createPlayer(message.guildId);
                     player.connect(vc.channelId, { deafen: true });
-                    createQueue(player, message.channelId);
+                    if (!queues.get(message.guildId)) {
+                        createQueue(player, message.channelId);
+                    }
 
                     return message.reply(embed(`Connected to <#${vc.channelId}>`), false);
                 }
@@ -160,6 +162,21 @@ startBot({
                         ),
                         false
                     );
+                }
+                case "leave": {
+                    let player = cluster.players.get(message.guildId);
+                    if (!player?.connected) {
+                        return message.reply(
+                            embed("A player for this guild doesn't exist."),
+                            false
+                        );
+                    }
+
+                    player.disconnect()
+                    return message.reply(
+                        embed("Left voice channel"),
+                        false
+                    )
                 }
                 case "play": {
                     const vc = message.guild?.voiceStates?.get(message.authorId);
