@@ -2,7 +2,7 @@
 <hr />
 <blockquote>
   A powerful lavalink client built on the <strong>Deno</strong> Runtime
-  <p><a href="https://discord.gg/CH9ubGPMV6">Discord Server</a> &bull; <a href="https://github.com/lavaclient/lavadeno">Github</a></p>
+  <p><a href="https://discord.gg/mNADeS6BtE">Discord Server</a> &bull; <a href="https://github.com/lavaclient/lavadeno">Github</a></p>
 </blockquote>
 
 - **Flexible:** Lavadeno is a generic library, meaning you can use it with just a connection to the discord gateway, no library restriction.
