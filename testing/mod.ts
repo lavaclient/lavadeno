@@ -23,7 +23,7 @@ const cluster = new Cluster({
         const shard = cache.guilds.get(id)?.shardId;
         if (shard != null) ws.sendShardMessage(shard, payload);
     },
-    userId: 870267613635309618n,
+    userId: 1006853946159157279n,
 });
 
 const queues: Map<bigint, Queue> = new Map();
@@ -45,7 +45,6 @@ cluster.on("nodeDebug", (node, message) => {
 
 cluster.on("nodeConnect", (node, reconnect) => {
     console.log(`[music] (node ${node.id}) ${reconnect ? "re" : ""}connected to node.`);
-    node.rest.routePlanner.status().then(status => console.dir(status));
 });
 
 startBot({
