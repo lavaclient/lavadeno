@@ -2,6 +2,6 @@ export type Dictionary<V = any, K extends string | number = string> = Record<K, 
 
 export default {
     maxEvents: 10,
-    clientName: "lavadeno",
+    clientName: `lavadeno (https://github.com/lavaclient/lavadeno, Deno v${Deno.version.deno})`,
     useFilters: false,
 };
