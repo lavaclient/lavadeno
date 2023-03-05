@@ -11,10 +11,9 @@
 
 <h2 align="center">Setup</h2>
 
+Requirements
 - Deno Runtime
-- Lavalink
-  - [Official](https://github.com/freyacodes/lavalink)
-  - [With Filters (Unofficial)](https://github.com/melike2d/lavalink/)
+- [Lavalink v3.x](https://github.com/freyacodes/lavalink)
 - Connection to the Discord Gateway.
 
 #### Single Node
