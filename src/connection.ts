@@ -238,7 +238,8 @@ export class Connection<N extends Node = Node> {
             case "stats":
                 this.node.stats = payload;
                 break;
-            default: {
+            case "playerUpdate":
+            case "event": {
                 const player = this.node.players.get(BigInt(payload.guildId));
                 if (player) {
                     if (payload.op === "playerUpdate") {
