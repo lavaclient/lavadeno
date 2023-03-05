@@ -3,7 +3,7 @@ import { backoff, Backoff, BackoffOptions } from "./util/backoff.ts";
 import constants from "./util/constants.ts";
 import { delay } from "./util/functions.ts";
 
-import { Lavalink, pogsockets, WebsocketOpCode } from "../deps.ts";
+import { Lavalink, pogsockets } from "../deps.ts";
 
 import type { Node } from "./node.ts";
 
@@ -70,7 +70,7 @@ export class Connection<N extends Node = Node> {
 
     async ping(): Promise<boolean> {
         if (this.active) {
-            await pogsockets.sendFrame(this.#_socket!, WebsocketOpCode.Ping, "");
+            await pogsockets.sendFrame(this.#_socket!, pogsockets.OpCode.Ping, "");
             this.#_lastPing = Date.now();
         }
 
